@@ -2,8 +2,9 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Pantry · Django</title>
+    <title>Smart Pantry · Laravel</title>
     <style>
         :root { color-scheme: light; }
         * { box-sizing: border-box; }
@@ -69,14 +70,14 @@
         .use-row input { width: 72px; padding: 4px 6px; }
         details.usage { margin-top: 8px; font-size: 0.85rem; color: #5a6570; }
         details.usage pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-all; background: #f6f8fc; padding: 8px; border-radius: 6px; }
-        @media (max-width: 640px) {
+        @@media (max-width: 640px) {
             th:nth-child(3), td:nth-child(3) { display: none; }
         }
     </style>
 </head>
 <body>
     <div class="wrap">
-        <span class="badge">Django · Smart Pantry</span>
+        <span class="badge">Laravel · Smart Pantry</span>
         <h1>智慧食材庫</h1>
         <p class="sub">資料來自本機 REST API（<code>/api/ingredients</code>），可在此查詢、新增、修改、刪除與記錄使用。</p>
 
@@ -179,13 +180,19 @@
         setFormMsg('');
     }
 
+
+    function formatDateOnly(v) {
+        const s = String(v);
+        return s.length >= 10 ? s.slice(0, 10) : s;
+    }
+
     function renderRow(item) {
         const tr = document.createElement('tr');
         tr.dataset.id = String(item.id);
         tr.innerHTML =
             '<td>' + item.id + '</td>' +
             '<td><strong>' + escapeHtml(item.name) + '</strong><div class="sub" style="margin:4px 0 0;font-size:.8rem;">' + escapeHtml(item.unit) + '</div></td>' +
-            '<td>' + escapeHtml(item.expiry_date) + '</td>' +
+            '<td>' + escapeHtml(formatDateOnly(item.expiry_date)) + '</td>' +
             '<td class="num">' + escapeHtml(String(item.quantity)) + '</td>' +
             '<td></td>';
         const td = tr.querySelector('td:last-child');
@@ -272,7 +279,7 @@
         document.getElementById('f-name').value = item.name;
         document.getElementById('f-qty').value = item.quantity;
         document.getElementById('f-unit').value = item.unit;
-        document.getElementById('f-exp').value = item.expiry_date;
+        document.getElementById('f-exp').value = formatDateOnly(item.expiry_date);
         formTitle.textContent = '編輯食材 #' + item.id;
         btnSubmit.textContent = '儲存變更';
         btnCancel.hidden = false;

@@ -28,3 +28,21 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# Flask & Django（Python）
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+*.egg
+
+# 本機 SQLite（若仍使用檔案型 DB）
+django-app/db.sqlite3
+flask-app/pantry.sqlite3

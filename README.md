@@ -25,14 +25,19 @@ multi-backend-rest-api-demo/
 
 - 應用目錄：`laravel-app`
 - 路由：`laravel-app/routes/web.php`
+- 已實作 Smart Pantry REST API（`/api/ingredients` 等）
 - 現有頁面：
-  - `/` -> `hello` view
+  - `/` -> `pantry` view（食材列表、新增／編輯／刪除／使用紀錄，透過 `fetch` 呼叫同一套 API）
   - `/welcome` -> `welcome` view
+- 若曾出現 **Blade 中文變 `?`** 或 Django **`UnicodeDecodeError`（例如 `0xb7`）**：代表範本不是有效 UTF-8（常見於標題裡的 `·` 變成單一位元組）。請勿手動貼上破壞編碼的內容；可從 Flask 範本重新產生：
+  - Laravel：`python laravel-app/scripts/build_pantry_view.py`
+  - Django：`python django-app/scripts/build_index_template.py`
 
 啟動（建議埠號 `8001`）：
 
 ```powershell
 cd F:\xampp\htdocs\multi-backend-rest-api-demo\laravel-app
+php artisan migrate
 php artisan serve --port=8001
 ```
 
@@ -40,8 +45,9 @@ php artisan serve --port=8001
 
 - 應用目錄：`flask-app`
 - 進入點：`flask-app/app.py`
+- 已實作 Smart Pantry REST API（`/api/ingredients` 等，MySQL）
 - 現有頁面：
-  - `/` -> `flask-app/templates/index.html`
+  - `/` -> `flask-app/templates/index.html`（食材 CRUD 網頁介面）
 
 啟動（建議埠號 `5000`）：
 
@@ -58,8 +64,9 @@ python app.py
 - 應用目錄：`django-app`
 - 路由：`django-app/config/urls.py`
 - 視圖：`django-app/config/views.py`
+- 已實作 Smart Pantry REST API（`/api/ingredients` 等）
 - 現有頁面：
-  - `/` -> `django-app/templates/index.html`
+  - `/` -> `django-app/templates/index.html`（食材 CRUD 網頁介面）
 
 啟動（建議埠號 `8002`）：
 
@@ -68,8 +75,21 @@ cd F:\xampp\htdocs\multi-backend-rest-api-demo\django-app
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install django
+python manage.py migrate
 python manage.py runserver 8002
 ```
+
+## Smart Pantry API 一覽（三端一致）
+
+- `GET /api/ingredients`
+- `GET /api/ingredients/{id}`
+- `POST /api/ingredients`
+- `PUT /api/ingredients/{id}`
+- `DELETE /api/ingredients/{id}`
+- `POST /api/ingredients/{id}/use`
+- `GET /api/ingredients/{id}/usage`
+- `GET /api/ingredients/expiring`
+- `GET /api/ingredients/low-stock`
 
 ## Python 套件（共用）
 
@@ -77,8 +97,15 @@ python manage.py runserver 8002
 
 ```txt
 flask
-django
+django>=4.2,<5
+pymysql
+mysqlclient>=2.2.1
+python-dotenv
 ```
+
+Django 連 MySQL 需使用 **mysqlclient**（2.2.1+）。請勿在 `config/__init__.py` 使用 `pymysql.install_as_MySQLdb()`，否則版本檢查會失敗。Flask 仍直接使用 `pymysql`。
+
+為相容常見 XAMPP 內建的 **MariaDB 10.4**，`requirements.txt` 將 Django 限制在 **4.2 LTS**（`django>=4.2,<5`）。若你已升級 MariaDB **10.6+**，可自行改為安裝 Django 5。
 
 安裝方式：
 
@@ -107,3 +134,17 @@ pip install -r requirements.txt
 ## 說明
 
 這份 README 以「目前狀態 + 開發方向」為主，不再記錄從零建立框架的流程。若需初始化教學，請另建 `docs/setup-from-scratch.md` 以維持主文件精簡。
+
+## 改用 XAMPP MySQL（Laravel / Flask / Django）
+
+
+1. 先啟動 XAMPP 的 `Apache` 與 `MySQL`。
+2. 在 phpMyAdmin 匯入 `setup_mysql.sql`（或用 MySQL CLI 執行）。
+3. 三端連線設定已預設完成：
+   - `laravel-app/.env`
+   - `flask-app/.env`
+   - `django-app/.env`
+4. 執行 migration / seed：
+   - Laravel：`php artisan migrate --seed`
+   - Django：`python manage.py migrate`
+   - Flask：啟動 `python app.py` 會自動建表與初始資料

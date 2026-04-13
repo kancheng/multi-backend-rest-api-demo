@@ -1,2 +1,5 @@
 flask
-django
+django>=4.2,<5
+pymysql
+mysqlclient>=2.2.1
+python-dotenv
